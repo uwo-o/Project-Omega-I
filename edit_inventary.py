@@ -1,69 +1,97 @@
+from re import T
 from tkinter import *
 from tkinter import ttk
 from typing import List
 from tkinter import messagebox
-
 import sqlite3
 
 
-def select(etr,list):
-    etr.delete(0,"end")
-    etr.insert(0,list.get(ANCHOR))
+def update_table(config,table):
+    conection=sqlite3.connect(config["DATA_BASE_NAME"])
+    cursor=conection.cursor()
+    cursor.execute("SELECT * FROM Inventario")
+    conection.commit()
+    logs = table.get_children()
+    for x in logs:
+        table.delete(x)
+    for x in cursor:
+        table.insert("",0,text=x[0],values=(x[1],x[2]))
 
-def add(root,etr,list,products,config):
-    conection = sqlite3.connect(config["DATA_BASE_NAME"])
-    cursor = conection.cursor()
-    if etr.get() not in products:
-        try:
-            cursor.execute("INSERT INTO Productos(ID,PRODUCTO) VALUES(NULL,'{}')".format(etr.get()))
+def add_product(config,table,product,quantity):
+    conection=sqlite3.connect(config["DATA_BASE_NAME"])
+    cursor=conection.cursor()
+    try:
+        if product.get()!="" and quantity.get()!="":
+            cursor.execute("INSERT INTO Inventario VALUES(NULL,'{}','{}')".format(product.get(),quantity.get()))
             conection.commit()
-            products.append(etr.get())
-            root.destroy()
-        except:
-            messagebox.showerror("ERROR", "No se ha podido actualizar la base de datos.")
-            root.destroy()
-    else:
-        messagebox.showinfo("EROOR","EL VALOR INGRESADO YA EXISTE") 
+            update_table(config,table)
+            product.delete(0,"end")
+            quantity.delete(0,"end")
 
-def delete(root,etr,list,products,config):
-    conection = sqlite3.connect(config["DATA_BASE_NAME"])
-    cursor = conection.cursor()
-    if etr.get() in products:
-        try:
-            cursor.execute("DELETE FROM Productos WHERE PRODUCTO='{}'".format(etr.get()))
+        else:
+            messagebox.showinfo("ADVERTENCIA","LOS CAMPOS NO PUEDEN ESTAR VACÍOS")
+    except:
+        pass
+
+def delete_product(config,table,id_entry):
+    conection=sqlite3.connect(config["DATA_BASE_NAME"])
+    cursor=conection.cursor()
+    try:
+        if id_entry.get!="":
+            cursor.execute("DELETE FROM Inventario WHERE ID='{}'".format(id_entry.get()))
             conection.commit()
-            products.remove(etr.get())
-            root.destroy()
-        except Exception as E:
-            messagebox.showerror("ERROR", E)
-            root.destroy()
-    else:
-        messagebox.showinfo("EROOR","NO EXISTE EL PRODUCTO") 
+            update_table(config,table)
+            id_entry.delete(0,"end")
+        else:
+            messagebox.showinfo("ADVERTENCIA","LOS CAMPOS NO PUEDEN ESTAR VACÍOS")
 
+    except:
+        pass
 
-def open_inventary(products,config):
+def open_inventary(config):
+
     root=Tk()
-    root.title("Productos")
-    root.geometry("400x400")
+    root.title("Editar Inventario")
+    root.geometry("400x600")
+    root.resizable(width=0, height=0)
 
-    producto_name=StringVar()
+    product=StringVar()
+    quantity=StringVar()
+    id=StringVar()
 
-    lbl=Label(root,text="Productos").pack()
- 
-    list=Listbox(root)
-    for x,y in enumerate(products):
-        list.insert(x+1,y)
-    list.pack(fill="x")
+    Label(root,text="PRODUCTO").grid(padx=10,row=0, column=0)
+    Label(root,text="CANTIDAD").grid(row=0, column=2)
+
+    product_entry=Entry(root,width=50,textvariable=product)
+    product_entry.grid(padx=10,row=1, column=0)
+    quantity_entry=Entry(root,width=10,textvariable=quantity)
+    quantity_entry.grid(row=1, column=2)
+
+    Button(root,width=40,text="INGRESAR",command=lambda:add_product(config,table,product_entry,quantity_entry)).grid(padx=5,pady=5,row=2,column=0,columnspan=3)
+
+    Label(root,text="INVENTARIO").grid(padx=5,pady=5,row=3,column=0,columnspan=3)
+
     
-    etr=Entry(root,textvariable=producto_name)
-    btn=Button(root, text="Seleccionar", command=lambda:select(etr,list))
+    table=ttk.Treeview(root,heigh=15, columns=('#0','#1'))
+    table.place(x=10,y=100)
+    table.column('#0',width=50)
+    table.heading('#0',text="ID", anchor=CENTER)
+    table.column('#1',width=250)
+    table.heading('#1',text="Productos", anchor=CENTER)
+    table.column('#2',width=75)
+    table.heading('#2',text="Cantidad", anchor=CENTER)
 
-    btn.pack(pady=10)
-    etr.pack(fill="x")
+    Label(root,text="ELIMINAR").place(x=160,y=430)
+    Label(root,text="ID").place(x=5,y=455)
+    id_entry=Entry(root,width=25,textvariable=id)
+    id_entry.place(x=30,y=455)
 
-    btn1=Button(root, text="Agregar", command=lambda:add(root,etr,list,products,config)).pack(pady=10)
+    Button(root,text="ACEPTAR",command=lambda:delete_product(config,table,id_entry)).place(x=200,y=450)
     
-    btn_delete=Button(root, text="Borrar", command=lambda:delete(root,etr,list,products,config)).pack(pady=10)
+
+    update_table(config,table)
 
     root.mainloop()
+
+
 

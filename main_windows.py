@@ -50,6 +50,7 @@ def products_update():
     entry1=ttk.Combobox(main_windows,textvariable=name,values=products)
     entry1.place(relx=0.06, rely=0.1,relwidth=0.5,relheight=0.03)
     entry1.delete(0,"end")
+    show()
     return products
 
 def refresh():
@@ -170,6 +171,7 @@ loadConfig(CONFIG_FILE)
 main_windows = Tk()
 main_windows.geometry(config["SCREEN_SIZE_X"]+"x"+config["SCREEN_SIZE_Y"])
 main_windows.title(config["NAME_ENTERPRISE"]+" - Inventario.")
+main_windows.resizable(width=0, height=0)
 
 wb = load_workbook(config["ROUTE_EXCEL"])
 ws = wb.active
@@ -231,7 +233,7 @@ sell_button.place(relx=0.01,rely=0.452)
 cancel_sell_button=Button(main_windows, text="Cancelar Venta",command=deleteToSell)
 cancel_sell_button.place(relx=0.08,rely=0.452)
 
-add_button=Button(main_windows, text="Editar a Inventario",command=open_inventary)
+add_button=Button(main_windows, text="Editar a Inventario",command=lambda:open_inventary(config))
 add_button.place(relx=0.155,rely=0.452)
 
 btm_refresh=Button(main_windows,text="Actualizar",command=products_update)
