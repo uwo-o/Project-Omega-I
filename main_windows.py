@@ -233,7 +233,7 @@ sell_button.place(relx=0.01,rely=0.452)
 cancel_sell_button=Button(main_windows, text="Cancelar Venta",command=deleteToSell)
 cancel_sell_button.place(relx=0.08,rely=0.452)
 
-add_button=Button(main_windows, text="Editar a Inventario",command=lambda:open_inventary(config))
+add_button=Button(main_windows, text="Editar Inventario",command=lambda:open_inventary(config))
 add_button.place(relx=0.155,rely=0.452)
 
 btm_refresh=Button(main_windows,text="Actualizar",command=products_update)

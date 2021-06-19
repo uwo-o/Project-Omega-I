@@ -29,7 +29,7 @@ def add_product(config,table,product,quantity):
             quantity.delete(0,"end")
 
         else:
-            messagebox.showinfo("ADVERTENCIA","LOS CAMPOS NO PUEDEN ESTAR VACÍOS")
+            messagebox.showinfo("ADVERTENCIA","LOS CAMPOS NO PUEDEN ESTAR VACIOS")
     except:
         pass
 
