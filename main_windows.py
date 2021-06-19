@@ -167,6 +167,7 @@ def loadConfig(file):
             config[x[0]]=x[1]
 
 loadConfig(CONFIG_FILE)
+connectDataBase()
 
 main_windows = Tk()
 main_windows.geometry(config["SCREEN_SIZE_X"]+"x"+config["SCREEN_SIZE_Y"])
@@ -239,5 +240,4 @@ add_button.place(relx=0.155,rely=0.452)
 btm_refresh=Button(main_windows,text="Actualizar",command=products_update)
 btm_refresh.place(relx=0.24, rely=0.452)
 
-connectDataBase()
 main_windows.mainloop()
