@@ -117,12 +117,23 @@ def exit():
     
 def addToSell():
     if entry1.get()!="" and entry_quantity.get()!="":
-        toSell.append((entry1.get(),entry_quantity.get()))
-        pre_sell_list.insert(0,entry1.get()+": "+entry_quantity.get())
+        flag=0
+        for x in toSell:
+            if x[0]==entry1.get():
+                flag=1
+        if flag==1:
+            aux=int(x[1])
+            aux+=int(entry_quantity.get())
+            x[1]=str(aux)
+            pre_sell_list.delete(0,"end")
+            pre_sell_list.insert(0,x[0]+": "+x[1])     
+        else:    
+            toSell.append([entry1.get(),entry_quantity.get()])
+            pre_sell_list.insert(0,entry1.get()+": "+entry_quantity.get())
 
 def deleteToSell():
     for x in toSell:
-        toSell.remove(x)
+        toSell.pop()
     pre_sell_list.delete(0,"end")
 
 def sell():
