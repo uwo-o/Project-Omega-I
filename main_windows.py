@@ -167,7 +167,6 @@ def loadConfig(file):
             config[x[0]]=x[1]
 
 loadConfig(CONFIG_FILE)
-connectDataBase()
 
 main_windows = Tk()
 main_windows.geometry(config["SCREEN_SIZE_X"]+"x"+config["SCREEN_SIZE_Y"])
@@ -194,7 +193,7 @@ name=StringVar()
 value=StringVar()
 
 #=======================HUD===========================
-
+connectDataBase()
 startMenu=Menu(main_windows)
 startMenuBD=Menu(startMenu, tearoff=0)
 
