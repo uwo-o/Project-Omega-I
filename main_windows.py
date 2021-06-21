@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter.font import Font
+from typing import Collection
 from edit_inventary import open_inventary
 from openpyxl import load_workbook
 import openpyxl
@@ -47,8 +48,8 @@ def products_update():
     for x in cursor:
         products.append(x[1])
     conection.commit()
-    entry1=ttk.Combobox(main_windows,textvariable=name,values=products)
-    entry1.place(relx=0.06, rely=0.1,relwidth=0.5,relheight=0.03)
+    entry1=ttk.Combobox(frame1,textvariable=name,values=products,width=40)
+    entry1.grid(row=1,column=0,columnspan=3)
     entry1.delete(0,"end")
     show()
     return products
@@ -210,44 +211,63 @@ startMenuBD=Menu(startMenu, tearoff=0)
 
 titleFont=Font(size=30)
 
+frame1=Frame(main_windows)
+frame1.place(x=10,y=50,relheight=0.4,relwidth=0.5)
+frame2=Frame(main_windows)
+frame2.place(x=540,y=110,relheight=0.3,relwidth=0.1)
+
 lbl=Label(main_windows, text=config["NAME_ENTERPRISE"],font=titleFont)
 lbl.pack()
 
-lbl=Label(main_windows, text="Producto")
-lbl.place(relx=0.01,rely=0.1,relwidth=0.05,relheight=0.03)
+#================
+#Frame 1 widgets
+#================
 
+entry1=ttk.Combobox(frame1,textvariable=name,values=products,width=40)
+entry1.grid(row=1,column=0,columnspan=3)
 
-entry0=Entry(main_windows, textvariable=id)
+lbl=Label(frame1, text="Producto")
+lbl.grid(row=0,column=1)
+
+entry0=Entry(frame1, textvariable=id)
+
 products=products_update()
 
-entry1=ttk.Combobox(main_windows,textvariable=name,values=products)
+lbl=Label(frame1, text="Cantidad")
+lbl.grid(row=0,column=4)
 
-lbl=Label(main_windows, text="Cantidad")
-lbl.place(relx=0.01,rely=0.15,relwidth=0.05,relheight=0.03)
+entry_quantity=Entry(frame1, textvariable=value)
+entry_quantity.grid(row=1,column=3,padx=10,columnspan=3)
+
+add_sell_button=Button(frame1, text="Agregar a Venta",command=addToSell)
+add_sell_button.grid(row=1,column=7)
+
+
+pre_sell_list=Listbox(frame1,height=50,width=85)
+pre_sell_list.grid(row=2,column=0,pady=10,columnspan=8)
+
+#=================
+#Frame 2 widgets
+#=================
+
+btm_refresh=Button(frame2,text="Actualizar",command=products_update,width=15)
+btm_refresh.grid(row=0,pady=1)
+
+add_button=Button(frame2, text="Editar Inventario",command=lambda:open_inventary(config),width=15)
+add_button.grid(row=1,pady=1)
+
+cancel_sell_button=Button(frame2, text="Cancelar Venta",command=deleteToSell,width=15)
+cancel_sell_button.grid(row=2,pady=1)
+
+sell_button=Button(frame2, text="Generar Venta",command=sell,width=15)
+sell_button.grid(row=3,pady=1)
+
+#=================
+#main_windows widgets
+#=================
 
 lbl=Label(main_windows, text="Inventario")
 lbl.place(relx=0.45,rely=0.47,relwidth=0.05,relheight=0.03)
 
-entry_quantity=Entry(main_windows, textvariable=value)
-entry_quantity.place(relx=0.06,rely=0.15)
-
-add_sell_button=Button(main_windows, text="Agregar a Venta",command=addToSell)
-add_sell_button.place(relx=0.16,rely=0.145)
-
-
-pre_sell_list=Listbox(main_windows)
-pre_sell_list.place(relx=0.01,rely=0.2,relwidth=0.5,relheight=0.25)
-
-sell_button=Button(main_windows, text="Generar Venta",command=sell)
-sell_button.place(relx=0.01,rely=0.452)
-
-cancel_sell_button=Button(main_windows, text="Cancelar Venta",command=deleteToSell)
-cancel_sell_button.place(relx=0.08,rely=0.452)
-
-add_button=Button(main_windows, text="Editar Inventario",command=lambda:open_inventary(config))
-add_button.place(relx=0.155,rely=0.452)
-
-btm_refresh=Button(main_windows,text="Actualizar",command=products_update)
-btm_refresh.place(relx=0.24, rely=0.452)
 
 main_windows.mainloop()
