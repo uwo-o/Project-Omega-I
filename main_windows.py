@@ -3,7 +3,6 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter.font import Font
 from typing import Collection
-from edit_inventary import open_inventary
 from openpyxl import load_workbook
 import openpyxl
 import re
@@ -19,6 +18,78 @@ toSell=[]
 CONFIG_FILE="config.conf"
 
 #=====================================================
+
+def update_table():
+    conection=sqlite3.connect(config["DATA_BASE_NAME"])
+    cursor=conection.cursor()
+    cursor.execute("SELECT * FROM Inventario")
+    conection.commit()
+    logs = mini_table.get_children()
+    for x in logs:
+        mini_table.delete(x)
+    for x in cursor:
+        mini_table.insert("",0,text=x[0],values=(x[1],x[2]))
+
+def add_product():
+    conection=sqlite3.connect(config["DATA_BASE_NAME"])
+    cursor=conection.cursor()
+    try:
+        if product.get()!="" and quantity.get()!="":
+            cursor.execute("INSERT INTO Inventario VALUES(NULL,'{}','{}')".format(product.get(),quantity.get()))
+            conection.commit()
+            update_table()
+            product_entry.delete(0,"end")
+            quantity_entry.delete(0,"end")
+
+        else:
+            messagebox.showinfo("ADVERTENCIA","LOS CAMPOS NO PUEDEN ESTAR VACIOS")
+    except:
+        pass
+
+def delete_product():
+    conection=sqlite3.connect(config["DATA_BASE_NAME"])
+    cursor=conection.cursor()
+    try:
+        if id2_entry.get()!="":
+            cursor.execute("DELETE FROM Inventario WHERE ID='{}'".format(id2_entry.get()))
+            conection.commit()
+            update_table()
+            id2_entry.delete(0,"end")
+        else:
+            messagebox.showinfo("ADVERTENCIA","LOS CAMPOS NO PUEDEN ESTAR VACÍOS")
+
+    except:
+        pass
+
+def update_stock():
+    conection=sqlite3.connect(config["DATA_BASE_NAME"])
+    cursor=conection.cursor()
+    try:
+        if id_entry.get()!="" and quantity_entry2.get()!="":
+            cursor.execute("UPDATE Inventario SET CANTIDAD={} WHERE ID = '{}'".format(quantity_entry2.get(),id_entry.get()))
+            conection.commit()
+            update_table()
+            id_entry.delete(0,"end")
+            quantity_entry2.delete(0,"end")
+        else:
+            messagebox.showinfo("ADVERTENCIA","LOS CAMPOS NO PUEDEN ESTAR VACÍOS")
+    
+    except:
+        pass
+
+def set_frame3():
+    frame3.place(x=670,y=50,relheight=0.42,relwidth=0.465)
+    edit_button['state'] = DISABLED
+    cancel_edit_button['state'] = NORMAL
+
+def destroy_frame3(value):
+    quantity_entry.delete(0,"end")
+    product_entry.delete(0,"end")
+    frame3.place(x=-670,y=-50,relheight=0.4,relwidth=0.465)
+    cancel_edit_button['state'] = DISABLED
+    edit_button['state'] = NORMAL
+    if value==1:
+        products_update()
 
 def connectDataBase():
     conection = sqlite3.connect(config["DATA_BASE_NAME"])
@@ -168,6 +239,7 @@ def sell():
     cleanObject()
     show()
 
+     
 """
 That's function reads the file config.cof and charge his configurations
 in the config dictionary, to use them.
@@ -215,6 +287,8 @@ frame1=Frame(main_windows)
 frame1.place(x=10,y=50,relheight=0.4,relwidth=0.5)
 frame2=Frame(main_windows)
 frame2.place(x=540,y=110,relheight=0.3,relwidth=0.1)
+frame3=Frame(main_windows)
+
 
 lbl=Label(main_windows, text=config["NAME_ENTERPRISE"],font=titleFont)
 lbl.pack()
@@ -253,14 +327,82 @@ pre_sell_list.grid(row=2,column=0,pady=10,columnspan=8)
 btm_refresh=Button(frame2,text="Actualizar",command=products_update,width=15)
 btm_refresh.grid(row=0,pady=1)
 
-add_button=Button(frame2, text="Editar Inventario",command=lambda:open_inventary(config),width=15)
-add_button.grid(row=1,pady=1)
+edit_button=Button(frame2, text="Editar Inventario",command=set_frame3,width=15)
+edit_button.grid(row=1,pady=1)
+
+cancel_edit_button=Button(frame2, text="Cerrar Inventario",command=lambda:destroy_frame3(value=0),width=15)
+cancel_edit_button.grid(row=2,pady=1)
+cancel_edit_button['state'] = DISABLED
 
 cancel_sell_button=Button(frame2, text="Cancelar Venta",command=deleteToSell,width=15)
-cancel_sell_button.grid(row=2,pady=1)
+cancel_sell_button.grid(row=3,pady=1)
 
 sell_button=Button(frame2, text="Generar Venta",command=sell,width=15)
-sell_button.grid(row=3,pady=1)
+sell_button.grid(row=4,pady=1)
+
+#================
+#Frame 3 widgets
+#================
+
+product=StringVar()
+quantity=StringVar()
+id=StringVar()
+id2=StringVar()
+quantity2=StringVar()
+
+edit_quiantity=StringVar()
+edit_id=StringVar()
+
+delete_id=StringVar()
+
+Label(frame3,text="INVENTARIO").grid(padx=5,pady=5,row=0,column=0,columnspan=4)
+
+
+mini_table=ttk.Treeview(frame3,heigh=5, columns=('#0','#1'))
+mini_table.grid(row=1,column=0,rowspan=4,columnspan=9)
+mini_table.column('#0',width=50)
+mini_table.heading('#0',text="ID", anchor=CENTER)
+mini_table.column('#1',width=280)
+mini_table.heading('#1',text="Productos", anchor=CENTER)
+mini_table.column('#2',width=75)
+mini_table.heading('#2',text="Cantidad", anchor=CENTER)
+
+
+Label(frame3,text="INGRESAR PRODUCTO").grid(row=8,column=0)
+Label(frame3,text="PRODUCTO").grid(padx=10,row=7, column=1)
+Label(frame3,text="CANTIDAD").grid(row=7, column=3)
+
+product_entry=Entry(frame3,width=50,textvariable=product)
+product_entry.grid(padx=10,row=8, column=1,columnspan=3)
+
+quantity_entry=Entry(frame3,width=10,textvariable=quantity)
+quantity_entry.grid(row=8, column=3,columnspan=1)
+
+Button(frame3,text="INGRESAR",command=lambda:add_product()).grid(padx=10,row=8,column=4)
+
+Label(frame3,text="EDITAR STOCK").grid(row=10,column=0)
+Label(frame3,text="ID").grid(row=9,column=1)
+Label(frame3,text="CANTIDAD").grid(row=9,column=3)
+
+id_entry=Entry(frame3,width=10,textvariable=edit_id)
+id_entry.grid(row=10,column=1)
+
+quantity_entry2=Entry(frame3,width=20,textvariable=edit_quiantity)
+quantity_entry2.grid(row=10,column=3)
+
+Button(frame3,text="ACTUALIZAR",command=lambda:update_stock()).grid(row=10,column=4)
+
+Label(frame3,text="ELIMINAR").grid(row=12,column=0)
+Label(frame3,text="ID").grid(row=11,column=1)
+
+id2_entry=Entry(frame3,width=10,textvariable=delete_id)
+id2_entry.grid(row=12,column=1)
+
+Button(frame3,text="ELIMINAR",command=lambda:delete_product()).grid(row=12,column=4)
+
+update_table()
+
+
 
 #=================
 #main_windows widgets
